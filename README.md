@@ -35,6 +35,10 @@ c.on('ready', function () {
 
     c.end();
   });
+}).connect({
+  host : 'thanks'
+  , user : 'for'
+  , password : 'allthefish'
 });
 ```
 
