@@ -1,0 +1,30 @@
+{
+  "name": "sftpjs",
+  "version": "1.0.0",
+  "description": "sftp api similar to ftp using ssh2",
+  "main": "sftp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wankdanker/node-sftpjs"
+  },
+  "keywords": [
+    "sftp",
+    "ftp",
+    "ssh",
+    "ssh2",
+    "file",
+    "transfer"
+  ],
+  "author": "Dan VerWeire",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wankdanker/node-sftpjs/issues"
+  },
+  "homepage": "https://github.com/wankdanker/node-sftpjs",
+  "dependencies": {
+    "ssh2": "^0.4.10"
+  }
+}
