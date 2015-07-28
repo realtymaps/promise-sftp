@@ -4,8 +4,8 @@ var sftp = SFTP();
 
 sftp.on('ready', function () {
 	console.log('ready');
-	sftp.list('.', function (err, data) {
-		console.dir(data);
+	sftp.mkdir('/home/dverweire/testing/thing/other/more', true, function (err, data) {
+		console.log(err, data);
 
 		sftp.end();
 	});

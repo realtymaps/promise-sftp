@@ -1,43 +1,8 @@
 var inherits = require('util').inherits
 	, EventEmitter = require('events').EventEmitter
 	, Client = require('ssh2').Client
-	, SFTPWrapper = require('ssh2/lib/SFTPWrapper')
+	, SFTPWrapper = require('./lib/sftp-wrapper') //needed to modify the prototype of ssh2/SFTPWrapper
 	;
-
-SFTPWrapper.prototype.list = function (path, useCompression, cb) {
-	var self = this
-		, regDash = /-/gi
-	
-	cb = arguments[arguments.length - 1];
-
-	self.readdir(path, function (err, data) {
-		if (err) {
-			return cb(err);
-		}
-
-		//create an ftp like result
-
-		data.forEach(function (f, i) {
-			data[i] = {
-				type : f.longname.substr(0, 1)
-				, name : f.filename
-				, size : f.attrs.size
-				, date : f.attrs.mtime
-				, rights : {
-					user : f.longname.substr(1,3).replace(regDash, '')
-					, group : f.longname.substr(4, 3).replace(regDash, '')
-					, other : f.longname.substr(7, 3).replace(regDash, '')
-				}
-				, owner : f.attrs.uid
-				, group : f.attrs.gid
-				, target : null //TODO
-				, sticky : null //TODO
-			}
-		});
-
-		return cb(null, data);
-	});
-};
 
 module.exports = SFTPClient
 
