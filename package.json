@@ -1,6 +1,6 @@
 {
   "name": "sftpjs",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "sftp api similar to ftp using ssh2",
   "main": "sftp.js",
   "scripts": {
