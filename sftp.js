@@ -13,13 +13,26 @@ function SFTPClient (options) {
 
 	var self = this;
 
+	self.closed = true;
+
 	EventEmitter.call(self);
 
 	self.conn = new Client();
 
-	self.conn.on('error', self.emit.bind(self, 'error'));
+	self.conn.on('error', function (err) {
+		//ignore errors if the connection has been closed
+		//this is to prevent a common ECONNRESET error that
+		//occurs.
+		if (self.closed) {
+			return;
+		}
+
+		self.emit('error', err);
+	});
 
 	self.conn.on('ready', function () {
+		self.closed = false;
+
 		self.conn.sftp(function (err, sftp) {
 			if (err) {
 				self.emit('error', err);
@@ -61,6 +74,7 @@ SFTPClient.prototype.end = function () {
 	var self = this;
 
 	self.conn.end.apply(self.conn, arguments);
+	self.closed = true;
 
 	return self;
 };
