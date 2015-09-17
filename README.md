@@ -13,10 +13,11 @@ I intend on implementing the following methods in a compatible way with mscdex/n
 * .connect() - done
 * .end() - done
 * .list() - done
-* .get()
-* .put()
+* .get() - done
+* .put() - done
 * .mkdir() - done
-* .rename()
+* .rename() - done
+* .delete() - done
 
 All other methods will be the same as defined in [ssh2-streams/SFTPStream](https://github.com/mscdex/ssh2-streams/blob/master/SFTPStream.md#sftpstream-methods).
 
