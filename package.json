@@ -1,30 +1,35 @@
 {
-  "name": "sftpjs",
-  "version": "1.3.0",
-  "description": "sftp api similar to ftp using ssh2",
-  "main": "sftp.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "promise-sftp",
+  "description": "a promise-based sftp client for node.js",
+  "version": "0.8.0",
+  "main": "index.js",
+  "author": "RealtyMaps",
+  "contributors": [
+    "Joe Ibershoff <joe@realtymaps.com>"
+  ],
+  "directories": {
+    "lib": "./lib"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wankdanker/node-sftpjs"
+    "url": "https://github.com/realtymaps/promise-sftp"
   },
   "keywords": [
     "sftp",
-    "ftp",
-    "ssh",
-    "ssh2",
-    "file",
-    "transfer"
+    "client",
+    "promise",
+    "node"
   ],
-  "author": "Dan VerWeire",
+  "dependencies": {
+    "bluebird": "2.x",
+    "coffee-script": "1.x",
+    "ssh2": "^0.4.11"
+  },
+  "peerDependencies": {
+    "promise-ftp-common": "^1.1.2"
+  },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wankdanker/node-sftpjs/issues"
-  },
-  "homepage": "https://github.com/wankdanker/node-sftpjs",
-  "dependencies": {
-    "ssh2": "^0.4.10"
+    "url": "https://github.com/realtymaps/promise-sftp/issues"
   }
 }
