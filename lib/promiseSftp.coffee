@@ -11,6 +11,7 @@ path = require('path')
 FtpConnectionError = require('promise-ftp-common').FtpConnectionError
 FtpReconnectError = require('promise-ftp-common').FtpReconnectError
 STATUSES = require('promise-ftp-common').STATUSES
+ERROR_CODES = require('./errorCodes')
 
 
 # these methods need no custom logic; just wrap the common logic around the originals and pass through any args
@@ -23,7 +24,6 @@ simplePassthroughMethods =
   createWriteStream: 'return'
   open: 'continue'
   close: 'continue'
-  read: 'continue'
   write: 'continue'
   fstat: 'continue'
   fsetstat: 'continue'
@@ -33,7 +33,6 @@ simplePassthroughMethods =
   opendir: 'continue'
   readdir: 'continue'
   unlink: 'continue'
-  rmdir: 'continue'
   stat: 'continue'
   lstat: 'continue'
   setstat: 'continue'
@@ -60,6 +59,7 @@ complexPassthroughMethods =
   listSafe: 'none'
   size: 'none'
   lastMod: 'none'
+  read: 'continue'
 
 # these methods do not use the common wrapper; they're listed here in order to be properly set on the prototype
 otherPrototypeMethods = [
@@ -325,6 +325,9 @@ class PromiseSftp
       if !recursive
         return promisifiedClientMethods.mkdir(dirPath, attributes)
 
+      # TODO: better recursive/error handling here
+      #result = @stat(dirPath)
+      #.then (stats) ->
       result = Promise.resolve()
       tokens = dirPath.split(/\//g)
       currPath = if dirPath.getCharAt(0) == '/' then '/' else ''
@@ -336,7 +339,7 @@ class PromiseSftp
         .then () =>
           @mkdir(currPath, false, attributes)
         .catch (err) ->
-          if err.code != 4
+          if err.code != ERROR_CODES.FAILURE && err.code != ERROR_CODES.FILE_ALREADY_EXISTS
             throw err
       result
 
@@ -352,6 +355,10 @@ class PromiseSftp
       .then (stats) ->
         new Date(stats.mtime * 1000)
 
+    @read = (handle, buffer, offset, length, position) ->
+      promisifiedClientMethods.read(handle, buffer, offset, length, position)
+      .spread (bytesRead, buffer, position) ->
+        { bytesRead, buffer, position }
 
     # common 'continue' logic
     continueLogicFactory = (clientContext, name) ->
@@ -416,7 +423,7 @@ class PromiseSftp
 
 
   # set method names on the prototype; they'll be overwritten with real functions from inside the constructor's closure
-  for methodList in [simplePassthroughMethods, complexPassthroughMethods, otherPrototypeMethods]
+  for methodList in [Object.keys(simplePassthroughMethods), Object.keys(complexPassthroughMethods), otherPrototypeMethods]
     for methodName in methodList
       PromiseSftp.prototype[methodName] = null
 
