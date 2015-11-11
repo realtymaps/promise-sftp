@@ -459,3 +459,4 @@ ssh errors vs sftp errors vs socket errors (?)
 * properly handle the `target` and `sticky` attributes on the **list()** command
 * fix **mkdir()** `recursive` option
 * add `recursive` option to **rmdir**
+* improve 'continue' handling to account for parallel promises

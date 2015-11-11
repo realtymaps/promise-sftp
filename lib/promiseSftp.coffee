@@ -111,6 +111,26 @@ class PromiseSftp
       if changePassword
         sshClient.removeListener('change password', changePassword)
 
+        
+    # common 'continue' logic
+    continueLogicFactory = (clientContext, name) ->
+      (args...) -> new Promise (resolve, reject) ->
+        continuePromise = new Promise (resolve2, reject2) ->
+          clientContext.client.once('continue', resolve2)
+          ready = clientContext.client[name] args..., (err, args2...) ->
+            if err
+              return reject(err)
+            if args2.length == 0
+              result = null
+            else if args2.length == 1
+              result = args2[0]
+            else
+              result = args2
+            resolve(result)
+          if ready
+            clientContext.client.removeListener('continue', resolve2)
+            resolve2()
+
 
     # internal connect logic
     _getSftpStream = continueLogicFactory(client: sshClient, 'sftp')
@@ -164,6 +184,12 @@ class PromiseSftp
     # methods listed in otherPrototypeMethods, which don't get a wrapper
 
     @connect = (options) -> Promise.try () ->
+      if connectionStatus != STATUSES.NOT_YET_CONNECTED && connectionStatus != STATUSES.DISCONNECTED
+        throw new FtpConnectionError("can't connect when connection status is: '#{connectionStatus}'")
+      # copy options object so options can't change without another call to @connect()
+      connectOptions = {}
+      for key,value of options
+        connectOptions[key] = value
       # autoReconnect is part of PromiseSftp, so it's not understood by the underlying sshClient
       autoReconnect = !!options.autoReconnect
       delete connectOptions.autoReconnect
@@ -360,25 +386,7 @@ class PromiseSftp
       .spread (bytesRead, buffer, position) ->
         { bytesRead, buffer, position }
 
-    # common 'continue' logic
-    continueLogicFactory = (clientContext, name) ->
-      (args...) -> new Promise (resolve, reject) ->
-        continuePromise = new Promise (resolve2, reject2) ->
-          clientContext.client.once('continue', resolve2)
-          ready = clientContext.client[name] args..., (err, args2...) ->
-            if err
-              return reject(err)
-            if args2.length == 0
-              result = null
-            else if args2.length == 1
-              result = args2[0]
-            else
-              result = args2
-            resolve(result)
-          if ready
-            clientContext.client.removeListener('continue', resolve2)
-            resolve2()
-    
+        
     # common promise, connection-check, and reconnect logic
     commonLogicFactory = (name, finishType, handler) ->
       if finishType == 'continue'
@@ -387,7 +395,7 @@ class PromiseSftp
         promisifiedClientMethods[name] = (args...) ->
           Promise.promisify(sftpClientContext.client[name], sftpClientContext.client)(args...)
       else if finishType == 'return'
-        promisifiedClientMethods[name] = Promise.try () -> sftpClientContext.client[name]
+        promisifiedClientMethods[name] = (args...) -> Promise.try () -> sftpClientContext.client[name](args...)
       else if finishType == 'none'
         promisifiedClientMethods[name] = null
       else  # catch programming errors
