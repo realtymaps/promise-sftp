@@ -240,24 +240,11 @@ class PromiseSftp
         if connectionStatus == STATUSES.NOT_YET_CONNECTED || connectionStatus == STATUSES.DISCONNECTED || connectionStatus == STATUSES.DISCONNECTING
           throw new FtpConnectionError("can't end connection when connection status is: #{connectionStatus}")
         new Promise (resolve, reject) ->
-          connectionStatus = STATUSES.LOGGING_OUT
-          sftpClientContext.client.once 'close', (hadError) ->
-            resolve(if hadError then lastSftpError||true else false)
-          sftpClientContext.client.end()
-      .then (maybeSftpError) ->
-        new Promise (resolve, reject) ->
-          if connectionStatus == STATUSES.NOT_YET_CONNECTED || connectionStatus == STATUSES.DISCONNECTED
-            return reject(new FtpConnectionError("can't end connection when connection status is: #{connectionStatus}"))
           restartOffset = null
           connectionStatus = STATUSES.DISCONNECTING
           sshClient.once 'close', (hadError) ->
             resolve(if hadError then lastSshError||true else false)
           sshClient.end()
-        .then (maybeSshError) ->
-          if maybeSftpError == true
-            maybeSshError || maybeSftpError
-          else
-            maybeSftpError || maybeSshError
 
     @logout = @end
     

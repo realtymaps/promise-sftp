@@ -1,7 +1,7 @@
 {
   "name": "promise-sftp",
   "description": "a promise-based sftp client for node.js",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "main": "index.js",
   "author": "RealtyMaps",
   "contributors": [
