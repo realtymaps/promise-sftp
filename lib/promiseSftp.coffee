@@ -162,23 +162,16 @@ class PromiseSftp
         sshClient.once('error', onSshError)
         sshClient.connect(connectOptions)
       .then (serverMessage) -> new Promise (resolve, reject) ->
+        closeSftpError = null
+        unexpectedClose = false
+        connectionStatus = STATUSES.CONNECTED
         sftpClientContext.client.on 'error', (err) ->
           lastSftpError = err
         sftpClientContext.client.on 'close', (hadError) ->
           if hadError
             closeSftpError = lastSftpError
           sshClient.destroy()
-        onSftpReady = () ->
-          sftpClientContext.client.removeListener('error', onSftpError)
-          closeSftpError = null
-          unexpectedClose = false
-          connectionStatus = STATUSES.CONNECTED
-          resolve(serverMessage)
-        onSftpError = (err) ->
-          sftpClientContext.client.removeListener('ready', onSftpReady)
-          reject(err)
-        sftpClientContext.client.once('ready', onSftpReady)
-        sftpClientContext.client.once('error', onSftpError)
+        serverMessage
 
 
     # methods listed in otherPrototypeMethods, which don't get a wrapper
