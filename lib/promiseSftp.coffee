@@ -161,7 +161,7 @@ class PromiseSftp
         sshClient.once('ready', onSshReady)
         sshClient.once('error', onSshError)
         sshClient.connect(connectOptions)
-      .then (serverMessage) -> new Promise (resolve, reject) ->
+      .then (serverMessage) ->
         closeSftpError = null
         unexpectedClose = false
         connectionStatus = STATUSES.CONNECTED
