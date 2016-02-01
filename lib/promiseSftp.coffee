@@ -336,7 +336,7 @@ class PromiseSftp
       #.then (stats) ->
       result = Promise.resolve()
       tokens = dirPath.split(/\//g)
-      currPath = if dirPath.getCharAt(0) == '/' then '/' else ''
+      currPath = if dirPath.charAt(0) == '/' then '/' else ''
       for token in tokens
         currPath = "#{currPath}/#{token}"
         if token == '.' || token == '..'
