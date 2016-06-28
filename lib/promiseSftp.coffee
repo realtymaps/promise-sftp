@@ -308,7 +308,7 @@ class PromiseSftp
       .then (stream) ->
         if input instanceof Buffer
           return stream.end(input)
-        stream.pipe(input)
+        input.pipe(stream)
         undefined
 
     @append = (input, destPath) ->
