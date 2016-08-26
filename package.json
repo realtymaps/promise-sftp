@@ -1,7 +1,7 @@
 {
   "name": "promise-sftp",
   "description": "a promise-based sftp client for node.js",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "main": "index.js",
   "author": "RealtyMaps",
   "contributors": [
@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "bluebird": "2.x",
-    "ssh2": "0.5.x"
+    "ssh2": "git://github.com/realtymaps/ssh2.git"
   },
   "devDependencies": {
     "coffee-script": "1.x"
