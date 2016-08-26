@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "bluebird": "2.x",
-    "ssh2": "git://github.com/realtymaps/ssh2.git"
+    "ssh2": "0.5.x"
   },
   "devDependencies": {
     "coffee-script": "1.x"
