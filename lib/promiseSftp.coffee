@@ -343,7 +343,7 @@ class PromiseSftp
           continue
         result = result
         .then () =>
-          @mkdir(currPath, false, attributes)
+          @mkdir(currPath, false, attributes) # this is totes broken, currPath is the final dir by the time it runs :(. can haz issues?
         .catch (err) ->
           if err.code != ERROR_CODES.FAILURE && err.code != ERROR_CODES.FILE_ALREADY_EXISTS
             throw err
