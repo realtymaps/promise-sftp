@@ -341,9 +341,10 @@ class PromiseSftp
         currPath = "#{currPath}/#{token}"
         if token == '.' || token == '..'
           continue
+        addMkdirJob = (newPath) =>
+          @mkdir(newPath, false, attributes)
         result = result
-        .then () =>
-          @mkdir(currPath, false, attributes)
+        .then (addMkdirJob(currPath))
         .catch (err) ->
           if err.code != ERROR_CODES.FAILURE && err.code != ERROR_CODES.FILE_ALREADY_EXISTS
             throw err
