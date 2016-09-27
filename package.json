@@ -23,13 +23,11 @@
   ],
   "dependencies": {
     "bluebird": "2.x",
-    "ssh2": "git://github.com/realtymaps/ssh2.git"
+    "ssh2": "git://github.com/realtymaps/ssh2.git",
+    "promise-ftp-common": "^1.1.2"
   },
   "devDependencies": {
     "coffee-script": "1.x"
-  },
-  "peerDependencies": {
-    "promise-ftp-common": "^1.1.2"
   },
   "license": "MIT",
   "bugs": {
