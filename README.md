@@ -31,7 +31,6 @@ Install
 =======
 
     npm install promise-sftp
-    npm install promise-ftp-errors   # only necessary on npm 3+
 
 
 Examples
