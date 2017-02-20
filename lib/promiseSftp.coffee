@@ -60,6 +60,7 @@ complexPassthroughMethods =
   size: 'none'
   lastMod: 'none'
   read: 'continue'
+  wait: 'none'
 
 # these methods do not use the common wrapper; they're listed here in order to be properly set on the prototype
 otherPrototypeMethods = [
@@ -111,7 +112,7 @@ class PromiseSftp
       if changePassword
         sshClient.removeListener('change password', changePassword)
 
-        
+    
     # common 'continue' logic
     continueLogicFactory = (clientContext, name) ->
       (args...) -> new Promise (resolve, reject) ->
@@ -131,6 +132,11 @@ class PromiseSftp
             clientContext.client.removeListener('continue', resolve2)
             resolve2()
 
+    # common 'finish' logic
+    finishLogic = (stream) ->
+      continuePromise = new Promise (resolve, reject) ->
+        stream.once('finish', resolve)
+      undefined
 
     # internal connect logic
     _getSftpStream = continueLogicFactory(client: sshClient, 'sftp')
@@ -176,66 +182,71 @@ class PromiseSftp
 
     # methods listed in otherPrototypeMethods, which don't get a wrapper
 
-    @connect = (options) -> Promise.try () ->
-      if connectionStatus != STATUSES.NOT_YET_CONNECTED && connectionStatus != STATUSES.DISCONNECTED
-        throw new FtpConnectionError("can't connect when connection status is: '#{connectionStatus}'")
-      # copy options object so options can't change without another call to @connect()
-      connectOptions = {}
-      for key,value of options
-        connectOptions[key] = value
-      # autoReconnect is part of PromiseSftp, so it's not understood by the underlying sshClient
-      autoReconnect = !!options.autoReconnect
-      delete connectOptions.autoReconnect
-      # privateKeyFile is part of PromiseSftp, so handle it here
-      if connectOptions.privateKeyFile && !connectOptions.privateKey
-        connectOptions.privateKey = fs.readFileSync(connectOptions.privateKeyFile)
-      delete connectOptions.privateKeyFile
-      # simplified password-change setup
-      if connectOptions.changePassword
-        _changePassword = connectOptions.changePassword
-        changePassword = (message, language, finish) ->
-          Promise.try () ->
-            _changePassword(message, language)
-          .catch (err) -> null
-          .then(finish)
-      delete connectOptions.changePassword
-      # simplified keyboard-interactive setup
-      if connectOptions.tryKeyboard
-        _keyboardInteractive = connectOptions.tryKeyboard
-        connectOptions.tryKeyboard = true
-        keyboardInteractive = (name, instructions, instructionsLang, prompts, finish) ->
-          Promise.try () ->
-            _keyboardInteractive(name, instructions, instructionsLang, prompts)
-          .catch (err) -> null
-          .all(finish)
-      # alias options.user to options.username to match the promise-ftp API
-      if connectOptions.user && !connectOptions.username
-        connectOptions.username = connectOptions.user
-      delete connectOptions.user
-      # alias options.connTimeout to options.readyTimeout to match the promise-ftp API
-      if connectOptions.connTimeout && !connectOptions.readyTimeout
-        connectOptions.readyTimeout = connectOptions.connTimeout
-      delete connectOptions.connTimeout
-      # alias options.pasvTimeout to options.readyTimeout to match the promise-ftp API
-      if connectOptions.pasvTimeout && !connectOptions.readyTimeout
-        connectOptions.readyTimeout = connectOptions.pasvTimeout
-      delete connectOptions.pasvTimeout
-      # alias options.keepalive to options.keepaliveInterval to match the promise-ftp API
-      if connectOptions.keepalive && !connectOptions.keepaliveInterval
-        connectOptions.keepaliveInterval = connectOptions.keepalive
-      delete connectOptions.keepalive
+    @connect = (options) ->
+      continuePromise
+      .then () ->
+        if connectionStatus != STATUSES.NOT_YET_CONNECTED && connectionStatus != STATUSES.DISCONNECTED
+          throw new FtpConnectionError("can't connect when connection status is: '#{connectionStatus}'")
+        # copy options object so options can't change without another call to @connect()
+        connectOptions = {}
+        for key,value of options
+          connectOptions[key] = value
+        # autoReconnect is part of PromiseSftp, so it's not understood by the underlying sshClient
+        autoReconnect = !!options.autoReconnect
+        delete connectOptions.autoReconnect
+        # privateKeyFile is part of PromiseSftp, so handle it here
+        if connectOptions.privateKeyFile && !connectOptions.privateKey
+          connectOptions.privateKey = fs.readFileSync(connectOptions.privateKeyFile)
+        delete connectOptions.privateKeyFile
+        # simplified password-change setup
+        if connectOptions.changePassword
+          _changePassword = connectOptions.changePassword
+          changePassword = (message, language, finish) ->
+            Promise.try () ->
+              _changePassword(message, language)
+            .catch (err) -> null
+            .then(finish)
+        delete connectOptions.changePassword
+        # simplified keyboard-interactive setup
+        if connectOptions.tryKeyboard
+          _keyboardInteractive = connectOptions.tryKeyboard
+          connectOptions.tryKeyboard = true
+          keyboardInteractive = (name, instructions, instructionsLang, prompts, finish) ->
+            Promise.try () ->
+              _keyboardInteractive(name, instructions, instructionsLang, prompts)
+            .catch (err) -> null
+            .all(finish)
+        # alias options.user to options.username to match the promise-ftp API
+        if connectOptions.user && !connectOptions.username
+          connectOptions.username = connectOptions.user
+        delete connectOptions.user
+        # alias options.connTimeout to options.readyTimeout to match the promise-ftp API
+        if connectOptions.connTimeout && !connectOptions.readyTimeout
+          connectOptions.readyTimeout = connectOptions.connTimeout
+        delete connectOptions.connTimeout
+        # alias options.pasvTimeout to options.readyTimeout to match the promise-ftp API
+        if connectOptions.pasvTimeout && !connectOptions.readyTimeout
+          connectOptions.readyTimeout = connectOptions.pasvTimeout
+        delete connectOptions.pasvTimeout
+        # alias options.keepalive to options.keepaliveInterval to match the promise-ftp API
+        if connectOptions.keepalive && !connectOptions.keepaliveInterval
+          connectOptions.keepaliveInterval = connectOptions.keepalive
+        delete connectOptions.keepalive
+  
+        # now that everything is set up, we can connect
+        _connect(STATUSES.CONNECTING)
 
-      # now that everything is set up, we can connect
-      _connect(STATUSES.CONNECTING)
-
-    @reconnect = () -> Promise.try () ->
-      if connectionStatus != STATUSES.NOT_YET_CONNECTED && connectionStatus != STATUSES.DISCONNECTED
-        throw new FtpConnectionError("can't reconnect when connection status is: '#{connectionStatus}'")
-      _connect(STATUSES.RECONNECTING)
+    @reconnect = () ->
+      continuePromise
+      .then () ->
+        if connectionStatus != STATUSES.NOT_YET_CONNECTED && connectionStatus != STATUSES.DISCONNECTED
+          throw new FtpConnectionError("can't reconnect when connection status is: '#{connectionStatus}'")
+        _connect(STATUSES.RECONNECTING)
 
     @end = () ->
-      wait = if autoReconnectPromise then autoReconnectPromise else Promise.resolve()
-      wait
+      (autoReconnectPromise || Promise.resolve())
+      .then () ->
+        continuePromise
       .then () ->
         if connectionStatus == STATUSES.NOT_YET_CONNECTED || connectionStatus == STATUSES.DISCONNECTED || connectionStatus == STATUSES.DISCONNECTING
           throw new FtpConnectionError("can't end connection when connection status is: #{connectionStatus}")
@@ -292,6 +303,9 @@ class PromiseSftp
           flags: 'r+'
         restartOffset = null
       promisifiedClientMethods.createReadStream(sourcePath, options)
+      .then (stream) ->
+        finishLogic(stream)
+        stream
 
     @put = (input, destPath) -> Promise.try () ->
       if restartOffset != null
@@ -306,6 +320,7 @@ class PromiseSftp
         input = fs.createReadStream(input)
       promisifiedClientMethods.createWriteStream(destPath, options)
       .then (stream) ->
+        finishLogic(stream)
         if input instanceof Buffer
           return stream.end(input)
         input.pipe(stream)
@@ -314,6 +329,7 @@ class PromiseSftp
     @append = (input, destPath) ->
       promisifiedClientMethods.createWriteStream(destPath, flags: 'a')
       .then (stream) ->
+        finishLogic(stream)
         #input can be a ReadableStream, Buffer or Path
         if input instanceof Buffer
           return stream.end(input)
@@ -366,6 +382,8 @@ class PromiseSftp
       promisifiedClientMethods.read(handle, buffer, offset, length, position)
       .spread (bytesRead, buffer, position) ->
         { bytesRead, buffer, position }
+        
+    @wait = () ->  # no-op, will perform wrapper logic only
 
         
     # common promise, connection-check, and reconnect logic
@@ -418,4 +436,3 @@ class PromiseSftp
 
 
 module.exports = PromiseSftp
-

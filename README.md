@@ -425,6 +425,8 @@ to create a hard link to `targetPath` at `linkPath`. Returned promise resolves t
 * **ext_openssh_fsync**(handle <_Buffer_>): **_OpenSSH extension_** Performs POSIX fsync(3) on the open handle
 `handle`. Returned promise resolves to _undefined_.
 
+* **wait**(): Waits for any previously-issued commands to complete.
+
 
 ### ATTRS and Stats Objects
 
