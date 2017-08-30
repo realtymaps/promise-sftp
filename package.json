@@ -1,26 +1,17 @@
 {
-  "name": "promise-sftp",
-  "description": "a promise-based sftp client for node.js",
+  "name": "@symbiont-io/promise-sftp",
+  "description": "a fork of a promise-based sftp client for node.js",
   "version": "0.10.0",
   "main": "index.js",
-  "author": "RealtyMaps",
-  "contributors": [
-    "Joe Ibershoff <joe@realtymaps.com>"
-  ],
+  "author": "Jacob Romer",
   "files": [
     "dist",
     "index.js"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/realtymaps/promise-sftp"
+    "url": "https://github.com/symbiont-io/promise-sftp"
   },
-  "keywords": [
-    "sftp",
-    "client",
-    "promise",
-    "node"
-  ],
   "dependencies": {
     "bluebird": "2.x",
     "promise-ftp-common": "^1.1.2",
