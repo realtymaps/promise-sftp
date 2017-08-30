@@ -295,9 +295,8 @@ class PromiseSftp
           group: file.attrs.gid
           target: null   # TODO
           sticky: null   # TODO
-    
-    @get = (sourcePath, opts) -> Promise.try () ->
-      options = opts || {}
+
+    @get = (sourcePath, options = {}) -> Promise.try () ->
       if restartOffset != null
         options.start = restartOffset
         options.flags = 'r+'
