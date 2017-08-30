@@ -295,12 +295,11 @@ class PromiseSftp
           group: file.attrs.gid
           target: null   # TODO
           sticky: null   # TODO
-    
-    @get = (sourcePath) -> Promise.try () ->
+
+    @get = (sourcePath, options = {}) -> Promise.try () ->
       if restartOffset != null
-        options =
-          start: restartOffset
-          flags: 'r+'
+        options.start = options.start || restartOffset
+        options.flags = options.flags || 'r+'
         restartOffset = null
       promisifiedClientMethods.createReadStream(sourcePath, options)
       .then (stream) ->
