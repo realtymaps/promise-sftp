@@ -32,7 +32,7 @@
     "iojs": "*"
   },
   "scripts": {
-    "prepublish": "coffee --compile --output dist/ lib/",
+    "prepare": "coffee --compile --output dist/ lib/",
     "dev": "coffee --watch --output dist lib/"
   }
 }
