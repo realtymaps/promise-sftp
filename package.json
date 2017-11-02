@@ -29,9 +29,6 @@
   "devDependencies": {
     "coffee-script": "1.x"
   },
-  "peerDependencies": {
-    "promise-ftp-common": "^1.1.2"
-  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/realtymaps/promise-sftp/issues"
