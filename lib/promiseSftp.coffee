@@ -354,7 +354,7 @@ class PromiseSftp
       currPath = if dirPath.charAt(0) == '/' then '/' else ''
       isFirst = true;
       for token in tokens
-        if isFirst then
+        if isFirst
           currPath = "#{token}"
           isFirst = false
         else
