@@ -352,8 +352,13 @@ class PromiseSftp
       result = Promise.resolve()
       tokens = dirPath.split(/\//g)
       currPath = if dirPath.charAt(0) == '/' then '/' else ''
+      isFirst = true;
       for token in tokens
-        currPath = "#{currPath}/#{token}"
+        if isFirst then
+          currPath = "#{token}"
+          isFirst = false
+        else
+          currPath = "#{currPath}/#{token}"
         if token == '.' || token == '..'
           continue
         addMkdirJob = (newPath) =>
