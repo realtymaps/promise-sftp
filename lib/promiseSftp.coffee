@@ -152,6 +152,8 @@ class PromiseSftp
           sshClient.on('change password', changePassword)
         onSshReady = () ->
           sshClient.removeListener('error', onSshError)
+          sshClient.removeListener('close', onSshClose)
+          sshClient.removeListener('end', onSshEnd)
           closeSshError = null
           _getSftpStream()
           .then (sftp) ->
@@ -163,9 +165,23 @@ class PromiseSftp
             reject(err)
         onSshError = (err) ->
           sshClient.removeListener('ready', onSshReady)
+          sshClient.removeListener('close', onSshClose)
+          sshClient.removeListener('end', onSshEnd)
           reject(err)
+        onSshClose = () ->
+          sshClient.removeListener('ready', onSshReady)
+          sshClient.removeListener('error', onSshError)
+          sshClient.removeListener('end', onSshEnd)
+          reject(new FtpConnectionError('unexpected close'))
+        onSshEnd = () ->
+          sshClient.removeListener('ready', onSshReady)
+          sshClient.removeListener('error', onSshError)
+          sshClient.removeListener('close', onSshClose)
+          reject(new FtpConnectionError('unexpected end'))
         sshClient.once('ready', onSshReady)
         sshClient.once('error', onSshError)
+        sshClient.once('close', onSshClose)
+        sshClient.once('end', onSshEnd)
         sshClient.connect(connectOptions)
       .then (serverMessage) ->
         closeSftpError = null
