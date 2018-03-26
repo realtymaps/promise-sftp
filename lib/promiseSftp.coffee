@@ -97,7 +97,7 @@ class PromiseSftp
     promisifiedClientMethods = {}
     restartOffset = null
 
-    
+
     # always-on event handlers
     sshClient.on 'error', (err) ->
       lastSshError = err
@@ -112,7 +112,7 @@ class PromiseSftp
       if changePassword
         sshClient.removeListener('change password', changePassword)
 
-    
+
     # common 'continue' logic
     continueLogicFactory = (clientContext, name) ->
       (args...) -> new Promise (resolve, reject) ->
@@ -135,7 +135,7 @@ class PromiseSftp
     # common 'finish' logic
     finishLogic = (stream) ->
       continuePromise = new Promise (resolve, reject) ->
-        stream.once('finish', resolve)
+        stream.once('close', resolve)
       undefined
 
     # internal connect logic
@@ -248,7 +248,7 @@ class PromiseSftp
         if connectOptions.keepalive && !connectOptions.keepaliveInterval
           connectOptions.keepaliveInterval = connectOptions.keepalive
         delete connectOptions.keepalive
-  
+
         # now that everything is set up, we can connect
         _connect(STATUSES.CONNECTING)
 
@@ -274,7 +274,7 @@ class PromiseSftp
           sshClient.end()
 
     @logout = @end
-    
+
     @destroy = () ->
       if connectionStatus == STATUSES.NOT_YET_CONNECTED || connectionStatus == STATUSES.DISCONNECTED
         wasDisconnected = true
@@ -291,7 +291,7 @@ class PromiseSftp
     @restart = (byteOffset) -> Promise.try () ->
       restartOffset = byteOffset
       undefined
-    
+
     # methods listed in complexPassthroughMethods, which will get a common logic wrapper
 
     @list = (path='.') ->
@@ -352,7 +352,7 @@ class PromiseSftp
           input = fs.createReadStream(input)
         input.pipe(stream)
         undefined
-  
+
     @delete = promisifiedClientMethods.unlink
 
     @mkdir = (dirPath, recursive, attributes) =>
@@ -402,10 +402,10 @@ class PromiseSftp
       promisifiedClientMethods.read(handle, buffer, offset, length, position)
       .spread (bytesRead, buffer, position) ->
         { bytesRead, buffer, position }
-        
+
     @wait = () ->  # no-op, will perform wrapper logic only
 
-        
+
     # common promise, connection-check, and reconnect logic
     commonLogicFactory = (name, finishType, handler) ->
       if finishType == 'continue'
